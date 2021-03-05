@@ -15,8 +15,7 @@ from sentry.api.decorators import sudo_required
 from sentry.api.fields.empty_integer import EmptyIntegerField
 from sentry.api.serializers import serialize
 from sentry.api.serializers.models.project import DetailedProjectSerializer
-from sentry.api.serializers.rest_framework.list import EmptyListField
-from sentry.api.serializers.rest_framework.list import ListField
+from sentry.api.serializers.rest_framework.list import EmptyListField, ListField
 from sentry.api.serializers.rest_framework.origin import OriginField
 from sentry.constants import RESERVED_PROJECT_SLUGS
 from sentry.datascrubbing import validate_pii_config_update
@@ -35,6 +34,8 @@ from sentry.models import (
 )
 from sentry.grouping.enhancer import Enhancements, InvalidEnhancerConfig
 from sentry.grouping.fingerprinting import FingerprintingRules, InvalidFingerprintingConfig
+from sentry.models.notificationsetting import NotificationSettingTypes, NotificationSettingOptionValues
+from sentry.notifications.manager import NotificationsManager
 from sentry.tasks.deletion import delete_project
 from sentry.utils import json
 from sentry.utils.compat import filter
@@ -554,13 +555,13 @@ class ProjectDetailsEndpoint(ProjectEndpoint):
             if project.update_option("sentry:origins", result["allowedDomains"]):
                 changed_proj_settings["sentry:origins"] = result["allowedDomains"]
 
-        if result.get("isSubscribed"):
-            UserOption.objects.set_value(
-                user=request.user, key="mail:alert", value=1, project=project
-            )
-        elif result.get("isSubscribed") is False:
-            UserOption.objects.set_value(
-                user=request.user, key="mail:alert", value=0, project=project
+        if "isSubscribed" in result:
+            value = NotificationSettingOptionValues.ALWAYS if result.get("isSubscribed") else NotificationSettingOptionValues.NEVER
+            NotificationsManager.update_settings(
+                NotificationSettingTypes.ISSUE_ALERTS,
+                value,
+                user=request.user,
+                project=project,
             )
 
         if "dynamicSampling" in result:
