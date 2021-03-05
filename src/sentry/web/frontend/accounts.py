@@ -235,6 +235,7 @@ def email_unsubscribe_project(request, project_id):
 
     if request.method == "POST":
         if "cancel" not in request.POST:
+            # TODO MARCOS 4
             UserOption.objects.set_value(
                 user=request.user, key="mail:alert", value=0, project=project
             )

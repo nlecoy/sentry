@@ -26,6 +26,9 @@ from sentry.models import (
     UserOptionValue,
     UserReport,
 )
+from sentry.models.integration import ExternalProviders
+from sentry.models.notificationsetting import NotificationSettingTypes, NotificationSettingOptionValues
+from sentry.notifications.manager import NotificationsManager
 from sentry.ownership import grammar
 from sentry.ownership.grammar import dump_schema, Matcher, Owner
 from sentry.plugins.base import Notification
@@ -94,8 +97,12 @@ class MailAdapterGetSendToTest(BaseMailAdapterTest, TestCase):
         )
 
         # Make sure that disabling mail alerts works as expected
-        UserOption.objects.set_value(
-            user=self.user2, key="mail:alert", value=0, project=self.project
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user2,
+            project=self.project,
         )
         assert {self.user.pk} == self.adapter.get_send_to(
             self.project, ActionTargetType.ISSUE_OWNERS, event=event.data
@@ -108,8 +115,12 @@ class MailAdapterGetSendToTest(BaseMailAdapterTest, TestCase):
         )
 
         # Make sure that disabling mail alerts works as expected
-        UserOption.objects.set_value(
-            user=self.user2, key="mail:alert", value=0, project=self.project
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user2,
+            project=self.project,
         )
         assert {self.user.pk} == self.adapter.get_send_to(
             self.project, ActionTargetType.ISSUE_OWNERS, event=event.data
@@ -160,7 +171,13 @@ class MailAdapterGetSendableUsersTest(BaseMailAdapterTest, TestCase):
         assert sorted({user.pk, user2.pk}) == sorted(self.adapter.get_sendable_users(project))
 
         # disabled user2
-        UserOption.objects.create(key="mail:alert", value=0, project=project, user=user2)
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user2,
+            project=self.project,
+        )
 
         assert user2.pk not in self.adapter.get_sendable_users(project)
 
@@ -431,7 +448,13 @@ class MailAdapterNotifyTest(BaseMailAdapterTest, TestCase):
         self.assert_notify(event_single_user, [user2.email])
 
         # Make sure that disabling mail alerts works as expected
-        UserOption.objects.set_value(user=user2, key="mail:alert", value=0, project=project)
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=user2,
+            project=project,
+        )
         event_all_users = self.store_event(
             data=self.make_event_data("foo.cbl"), project_id=project.id
         )
@@ -557,14 +580,22 @@ class MailAdapterShouldNotifyTest(BaseMailAdapterTest, TestCase):
         assert self.adapter.should_notify(ActionTargetType.MEMBER, self.group)
 
     def test_should_not_notify_no_users(self):
-        UserOption.objects.set_value(
-            user=self.user, key="mail:alert", value=0, project=self.project
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user,
+            project=self.project,
         )
         assert not self.adapter.should_notify(ActionTargetType.ISSUE_OWNERS, self.group)
 
     def test_should_always_notify_target_member(self):
-        UserOption.objects.set_value(
-            user=self.user, key="mail:alert", value=0, project=self.project
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user,
+            project=self.project,
         )
         assert self.adapter.should_notify(ActionTargetType.MEMBER, self.group)
 
@@ -634,8 +665,12 @@ class MailAdapterGetSendToOwnersTest(BaseMailAdapterTest, TestCase):
 
     def test_disable_alerts(self):
         # Make sure that disabling mail alerts works as expected
-        UserOption.objects.set_value(
-            user=self.user2, key="mail:alert", value=0, project=self.project
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user2,
+            project=self.project,
         )
         event_all_users = self.store_event(
             data=self.make_event_data("foo.cbl"), project_id=self.project.id
@@ -651,7 +686,13 @@ class MailAdapterGetSendToTeamTest(BaseMailAdapterTest, TestCase):
         assert {self.user.id} == self.adapter.get_send_to_team(self.project, str(self.team.id))
 
     def test_send_disabled(self):
-        UserOption.objects.create(key="mail:alert", value=0, project=self.project, user=self.user)
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user,
+            project=self.project,
+        )
         assert set() == self.adapter.get_send_to_team(self.project, str(self.team.id))
 
     def test_invalid_team(self):
@@ -678,7 +719,13 @@ class MailAdapterGetSendToMemberTest(BaseMailAdapterTest, TestCase):
         assert {self.user.id} == self.adapter.get_send_to_member(self.project, str(self.user.id))
 
     def test_send_disabled_still_sends(self):
-        UserOption.objects.create(key="mail:alert", value=0, project=self.project, user=self.user)
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.ISSUE_ALERTS,
+            NotificationSettingOptionValues.NEVER,
+            user=self.user,
+            project=self.project,
+        )
         assert {self.user.id} == self.adapter.get_send_to_member(self.project, str(self.user.id))
 
     def test_invalid_user(self):
@@ -706,8 +753,11 @@ class MailAdapterGetSendToMemberTest(BaseMailAdapterTest, TestCase):
 
 class MailAdapterNotifyAboutActivityTest(BaseMailAdapterTest, TestCase):
     def test_assignment(self):
-        UserOption.objects.set_value(
-            user=self.user, key="workflow:notifications", value=UserOptionValue.all_conversations
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.WORKFLOW,
+            NotificationSettingOptionValues.ALWAYS,
+            user=self.user,
         )
         activity = Activity.objects.create(
             project=self.project,
@@ -728,8 +778,11 @@ class MailAdapterNotifyAboutActivityTest(BaseMailAdapterTest, TestCase):
         assert msg.to == [self.user.email]
 
     def test_assignment_team(self):
-        UserOption.objects.set_value(
-            user=self.user, key="workflow:notifications", value=UserOptionValue.all_conversations
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.WORKFLOW,
+            NotificationSettingOptionValues.ALWAYS,
+            user=self.user,
         )
 
         activity = Activity.objects.create(
@@ -752,8 +805,11 @@ class MailAdapterNotifyAboutActivityTest(BaseMailAdapterTest, TestCase):
 
     def test_note(self):
         user_foo = self.create_user("foo@example.com")
-        UserOption.objects.set_value(
-            user=self.user, key="workflow:notifications", value=UserOptionValue.all_conversations
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.WORKFLOW,
+            NotificationSettingOptionValues.ALWAYS,
+            user=self.user,
         )
 
         activity = Activity.objects.create(
@@ -791,8 +847,11 @@ class MailAdapterHandleSignalTest(BaseMailAdapterTest, TestCase):
 
     def test_user_feedback(self):
         report = self.create_report()
-        UserOption.objects.set_value(
-            user=self.user, key="workflow:notifications", value=UserOptionValue.all_conversations
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.WORKFLOW,
+            NotificationSettingOptionValues.ALWAYS,
+            user=self.user,
         )
 
         with self.tasks():
@@ -820,8 +879,11 @@ class MailAdapterHandleSignalTest(BaseMailAdapterTest, TestCase):
     def test_user_feedback__enhanced_privacy(self):
         self.organization.update(flags=F("flags").bitor(Organization.flags.enhanced_privacy))
         assert self.organization.flags.enhanced_privacy.is_set is True
-        UserOption.objects.set_value(
-            user=self.user, key="workflow:notifications", value=UserOptionValue.all_conversations
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.WORKFLOW,
+            NotificationSettingOptionValues.ALWAYS,
+            user=self.user,
         )
 
         report = self.create_report()

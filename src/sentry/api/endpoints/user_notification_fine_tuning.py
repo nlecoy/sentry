@@ -14,7 +14,7 @@ from sentry.models import (
     UserEmail,
 )
 
-
+# TODO MARCOS move this mapping
 KEY_MAP = {
     "alerts": {"key": "mail:alert", "type": int},
     "workflow": {"key": "workflow:notifications", "type": ""},

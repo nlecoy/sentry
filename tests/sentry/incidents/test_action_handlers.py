@@ -44,6 +44,7 @@ class EmailActionHandlerGetTargetsTest(TestCase):
         assert handler.get_targets() == [(self.user.id, self.user.email)]
 
     def test_user_alerts_disabled(self):
+        # TODO MARCOS 3
         UserOption.objects.set_value(
             user=self.user, key="mail:alert", value=0, project=self.project
         )
@@ -68,6 +69,7 @@ class EmailActionHandlerGetTargetsTest(TestCase):
         }
 
     def test_team_alert_disabled(self):
+        # TODO MARCOS 3
         UserOption.objects.set_value(
             user=self.user, key="mail:alert", value=0, project=self.project
         )

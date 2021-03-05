@@ -91,6 +91,7 @@ class GetParticipantsTest(TestCase):
         self.create_member(user=user, organization=org, teams=[team])
         self.create_member(user=user2, organization=org)
 
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user, key="workflow:notifications", value=UserOptionValue.all_conversations
         )
@@ -110,6 +111,7 @@ class GetParticipantsTest(TestCase):
         # not participating by default
         GroupSubscription.objects.filter(user=user, group=group).delete()
 
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user, key="workflow:notifications", value=UserOptionValue.participating_only
         )
@@ -140,6 +142,7 @@ class GetParticipantsTest(TestCase):
         self.create_member(user=user, organization=org, teams=[team])
 
         user_option_sequence = itertools.count(300)  # prevent accidental overlap with user id
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user, key="workflow:notifications", value=UserOptionValue.all_conversations
         )
@@ -155,6 +158,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.implicit}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -168,6 +172,7 @@ class GetParticipantsTest(TestCase):
         # Implicit subscription, ensure the project setting overrides the
         # explicit global option.
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -179,6 +184,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.implicit}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -202,6 +208,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.comment}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -214,6 +221,7 @@ class GetParticipantsTest(TestCase):
 
         # Explicit subscription, overridden by the project option.
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -225,6 +233,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.comment}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -241,6 +250,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.comment}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -256,6 +266,7 @@ class GetParticipantsTest(TestCase):
         group = self.create_group(project=project)
         user = self.create_user()
         self.create_member(user=user, organization=org, teams=[team])
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user, key="workflow:notifications", value=UserOptionValue.all_conversations
         )
@@ -273,6 +284,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.implicit}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -286,6 +298,7 @@ class GetParticipantsTest(TestCase):
         # Implicit subscription, ensure the project setting overrides the
         # explicit global option.
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -297,6 +310,7 @@ class GetParticipantsTest(TestCase):
         with self.assertChanges(
             get_participants, before={user: GroupSubscriptionReason.implicit}, after={}
         ):
+            # TODO MARCOS 9
             UserOption.objects.create(
                 id=next(user_option_sequence),
                 user=user,
@@ -309,6 +323,7 @@ class GetParticipantsTest(TestCase):
 
         # Ensure the global default is applied.
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -333,6 +348,7 @@ class GetParticipantsTest(TestCase):
 
         # Ensure the project setting overrides the global default.
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -357,6 +373,7 @@ class GetParticipantsTest(TestCase):
 
         # Ensure the project setting overrides the global setting.
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -365,6 +382,7 @@ class GetParticipantsTest(TestCase):
             value=UserOptionValue.all_conversations,
         )
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -387,6 +405,7 @@ class GetParticipantsTest(TestCase):
         subscription.delete()
         clear_workflow_options()
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -395,6 +414,7 @@ class GetParticipantsTest(TestCase):
             value=UserOptionValue.participating_only,
         )
 
+        # TODO MARCOS 9
         UserOption.objects.create(
             id=next(user_option_sequence),
             user=user,
@@ -441,6 +461,7 @@ class GetParticipantsTest(TestCase):
 
         assert users == {}
 
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user,
             project=project,
@@ -460,6 +481,7 @@ class GetParticipantsTest(TestCase):
 
         assert users == {}
 
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user,
             project=project,

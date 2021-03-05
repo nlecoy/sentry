@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from rest_framework import serializers
 
+# TODO MARCOS move this mapping
 USER_OPTION_SETTINGS = {
     "deployNotifications": {
         "key": "deploy-emails",

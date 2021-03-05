@@ -77,6 +77,8 @@ class NotificationSetting(Model):
     Each row is a notification setting where a key is:
     ("scope_type", "scope_identifier", "target_type", "target_identifier", "provider", "type"),
     and the value is ("value").
+
+    TODO MARCOS should I overwrite objects?
     """
 
     __core__ = False

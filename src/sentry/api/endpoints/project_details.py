@@ -34,6 +34,7 @@ from sentry.models import (
 )
 from sentry.grouping.enhancer import Enhancements, InvalidEnhancerConfig
 from sentry.grouping.fingerprinting import FingerprintingRules, InvalidFingerprintingConfig
+from sentry.models.integration import ExternalProviders
 from sentry.models.notificationsetting import NotificationSettingTypes, NotificationSettingOptionValues
 from sentry.notifications.manager import NotificationsManager
 from sentry.tasks.deletion import delete_project
@@ -558,6 +559,7 @@ class ProjectDetailsEndpoint(ProjectEndpoint):
         if "isSubscribed" in result:
             value = NotificationSettingOptionValues.ALWAYS if result.get("isSubscribed") else NotificationSettingOptionValues.NEVER
             NotificationsManager.update_settings(
+                ExternalProviders.EMAIL,
                 NotificationSettingTypes.ISSUE_ALERTS,
                 value,
                 user=request.user,

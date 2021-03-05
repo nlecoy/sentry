@@ -6,6 +6,8 @@ from sentry.db.models.fields import EncryptedPickledObjectField
 from sentry.db.models.manager import OptionManager
 
 
+# TODO MARCOS this mapping is SUS
+# TODO MARCOD DANGER
 class UserOptionValue:
     # 'workflow:notifications'
     all_conversations = "0"
@@ -43,6 +45,7 @@ class UserOptionManager(OptionManager):
             result = self.get_all_values(user, project)
         return result.get(key, default)
 
+    # TODO MARCOS 2 don't forget unset
     def unset_value(self, user, project, key):
         # this isn't implemented for user-organization scoped options yet, because
         # it hasn't been needed
@@ -56,6 +59,7 @@ class UserOptionManager(OptionManager):
             return
         self._option_cache[metakey].pop(key, None)
 
+    # TODO MARCOS 2 set_value
     def set_value(self, user, key, value, **kwargs):
         project = kwargs.get("project")
         organization = kwargs.get("organization")

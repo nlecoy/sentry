@@ -142,6 +142,7 @@ class ReleaseTestCase(TestCase):
             order=3,
         )
 
+        # TODO MARCOS 6
         UserOption.objects.set_value(
             user=self.user3,
             organization=self.org,
@@ -149,6 +150,7 @@ class ReleaseTestCase(TestCase):
             value=UserOptionValue.all_deploys,
         )
 
+        # TODO MARCOS 6
         UserOption.objects.set_value(
             user=self.user4,
             organization=self.org,
@@ -157,6 +159,7 @@ class ReleaseTestCase(TestCase):
         )
 
         # added to make sure org default above takes precedent
+        # TODO MARCOS 6
         UserOption.objects.set_value(
             user=self.user4,
             organization=None,
@@ -272,6 +275,7 @@ class ReleaseTestCase(TestCase):
         user6 = self.create_user()
         self.create_member(user=user6, organization=self.org, teams=[self.team])
 
+        # TODO MARCOS 6
         UserOption.objects.set_value(
             user=user6, organization=None, key="deploy-emails", value=UserOptionValue.all_deploys
         )

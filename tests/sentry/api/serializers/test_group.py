@@ -197,10 +197,12 @@ class GroupSerializerTest(TestCase):
 
         def maybe_set_value(project, value):
             if value is not None:
+                # TODO MARCOS 1
                 UserOption.objects.set_value(
                     user=user, project=project, key="workflow:notifications", value=value
                 )
             else:
+                # TODO MARCOS 7
                 UserOption.objects.unset_value(
                     user=user, project=project, key="workflow:notifications"
                 )
@@ -222,6 +224,7 @@ class GroupSerializerTest(TestCase):
             user=user, group=group, project=group.project, is_active=True
         )
 
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user,
             project=None,
@@ -241,6 +244,7 @@ class GroupSerializerTest(TestCase):
             user=user, group=group, project=group.project, is_active=True
         )
 
+        # TODO MARCOS 1
         UserOption.objects.set_value(
             user=user,
             project=group.project,

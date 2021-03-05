@@ -14,6 +14,7 @@ class RedmineClient:
         req = getattr(session, method.lower())(url, json=data, headers=headers)
         return json.loads(req.text)
 
+    # TODO is there no get_issues?
     def get_projects(self):
         limit = 100
         projects = []

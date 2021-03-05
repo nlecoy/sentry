@@ -311,12 +311,14 @@ class FilterToSubscribedUsersTest(TestCase):
     def test_project_enabled(self):
         user = self.create_user()
         UserOption.objects.set_value(user, "subscribe_by_default", "0")
+        # TODO MARCOS 3
         UserOption.objects.set_value(user, "mail:alert", 1, project=self.project)
         self.run_test([user], [user])
 
     def test_project_disabled(self):
         user = self.create_user()
         UserOption.objects.set_value(user, "subscribe_by_default", "1")
+        # TODO MARCOS 3
         UserOption.objects.set_value(user, "mail:alert", 0, project=self.project)
         self.run_test([user], [])
 
@@ -327,9 +329,11 @@ class FilterToSubscribedUsersTest(TestCase):
         UserOption.objects.set_value(user_global_disabled, "subscribe_by_default", "0")
         user_project_enabled = self.create_user()
         UserOption.objects.set_value(user_project_enabled, "subscribe_by_default", "0")
+        # TODO MARCOS 3
         UserOption.objects.set_value(user_project_enabled, "mail:alert", 1, project=self.project)
         user_project_disabled = self.create_user()
         UserOption.objects.set_value(user_project_disabled, "subscribe_by_default", "1")
+        # TODO MARCOS 3
         UserOption.objects.set_value(user_project_disabled, "mail:alert", 0, project=self.project)
         self.run_test(
             [

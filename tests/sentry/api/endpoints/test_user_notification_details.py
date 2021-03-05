@@ -1,3 +1,4 @@
+from sentry.notifications.manager import NotificationsManager
 from sentry.testutils import APITestCase
 from sentry.models import UserOption, UserOptionValue
 
@@ -44,11 +45,19 @@ class UserNotificationDetailsTest(APITestCase):
 
         # Adding existing UserOptions for a project or org to test that defaults are correct
         # default is 3
+        # TODO MARCOS 9
         UserOption.objects.create(
             user=user, project=None, organization=org, key="deploy-emails", value=1
         )
+        NotificationsManager.update_settings(
+            ExternalProviders.EMAIL,
+            NotificationSettingTypes.DEPLOY,
+            NotificationSettingOptionValues.ALWAYS,
+            user=self.user,
+        )
 
         # default is UserOptionValue.participating_only
+        # TODO MARCOS 9
         UserOption.objects.create(
             user=user,
             project=None,
@@ -103,6 +112,7 @@ class UserNotificationDetailsTest(APITestCase):
         user = self.create_user(email="a@example.com")
         org = self.create_organization(name="Org Name", owner=user)
         self.login_as(user=user)
+        # TODO MARCOS 9
         UserOption.objects.create(
             user=user, project=None, organization=org, key="deploy-emails", value=1
         )
