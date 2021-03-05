@@ -1,4 +1,5 @@
 import math
+import pytest
 
 from freezegun import freeze_time
 from django.http import QueryDict
@@ -8,11 +9,12 @@ from sentry.snuba.sessions_v2 import (
     QueryDefinition,
     massage_sessions_result,
     _get_timestamps,
+    InvalidParams,
 )
 
 
-def _make_query(qs):
-    return QueryDefinition(QueryDict(qs), {})
+def _make_query(qs, allow_minute_resolution=True):
+    return QueryDefinition(QueryDict(qs), {}, allow_minute_resolution)
 
 
 def result_sorted(result):
@@ -33,6 +35,37 @@ def test_timestamps():
     actual_timestamps = _get_timestamps(query)
 
     assert actual_timestamps == expected_timestamps
+
+
+@freeze_time("2021-03-05T11:14:17.105Z")
+def test_interval_restrictions():
+    # making sure intervals are cleanly divisible
+    with pytest.raises(InvalidParams, match="interval has to be less than one day"):
+        _make_query("statsPeriod=4d&interval=2d&field=sum(session)")
+    with pytest.raises(InvalidParams, match="interval not cleanly divisible"):
+        _make_query("statsPeriod=6h&interval=59m&field=sum(session)")
+    with pytest.raises(InvalidParams, match="interval not cleanly divisible"):
+        _make_query("statsPeriod=4d&interval=5h&field=sum(session)")
+    _make_query("statsPeriod=6h&interval=90m&field=sum(session)")
+    with pytest.raises(
+        InvalidParams, match="interval has to be a multiple of the minimum interval"
+    ):
+        _make_query("statsPeriod=6h&interval=90m&field=sum(session)", False)
+
+    # restrictions for minute resolution time range
+    with pytest.raises(InvalidParams, match="one-minute resolution is restricted to 6h"):
+        _make_query("statsPeriod=7h&interval=15m&field=sum(session)")
+    with pytest.raises(
+        InvalidParams, match="one-minute resolution is restricted to the last 30 days"
+    ):
+        _make_query(
+            "start=2021-01-05T11:14:17&end=2021-01-05T12:14:17&interval=15m&field=sum(session)"
+        )
+
+    with pytest.raises(
+        InvalidParams, match="Your interval and date range would create too many results."
+    ):
+        _make_query("statsPeriod=90d&interval=1h&field=sum(session)")
 
 
 def test_simple_query():
